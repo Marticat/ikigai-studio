@@ -1,3 +1,5 @@
+import {language} from './i18n.mjs';
+import {availabilityText} from './availability.mjs';
 import {preferenceStorage,preferencesEnabled} from './privacy-storage.mjs';
 import {loadCatalog,catalogUnavailable} from './catalog-client.mjs';
 import {priceLabel,fitEnquiry} from './order-model.mjs';
@@ -27,20 +29,20 @@ function renderCatalog(){
  const preferred=['glass-dark','meidu-062','accessories','shelves','meidu-044','meidu-067'];
  const ordered=[...preferred.map(id=>products.find(p=>p.id===id)).filter(Boolean),...products.filter(p=>!preferred.includes(p.id))];
  const matching=filterProducts(ordered,filter,query),found=matching.slice(0,6);
- grid.innerHTML=found.map(raw=>{const p=displayProduct(raw);return `<article class="product-card"><div class="card-media"><a class="card-open" href="catalog.html?product=${p.id}" aria-label="Рассмотреть: ${p.name}"><img src="${p.image}" alt="${p.name}" loading="lazy" width="800" height="1000"><span class="card-index">${String(products.findIndex(item=>item.id===raw.id)+1).padStart(2,'0')}</span><span class="card-explore" aria-hidden="true">↗</span></a><button class="save-button" data-save="${p.id}" aria-pressed="${selection.includes(p.id)}" aria-label="Добавить в подборку: ${p.name}">+</button></div><div class="card-label"><span>${p.tag}</span></div><h3 class="card-title"><a href="catalog.html?product=${p.id}">${p.name}</a></h3><p class="card-price">${escapeHTML(priceLabel(raw))}</p></article>`;}).join('');
+ grid.innerHTML=found.map(raw=>{const p=displayProduct(raw);return `<article class="product-card"><div class="card-media"><a class="card-open" href="catalog.html?product=${p.id}" aria-label="Рассмотреть: ${p.name}"><img src="${p.image}" alt="${p.name}" loading="lazy" width="800" height="1000"><span class="card-explore" aria-hidden="true">›</span></a><button class="save-button" data-save="${p.id}" aria-pressed="${selection.includes(p.id)}" aria-label="Добавить в подборку: ${p.name}">+</button></div><div class="card-label"><span>${p.tag}</span></div><h3 class="card-title"><a href="catalog.html?product=${p.id}">${p.name}</a></h3><p class="card-price">${escapeHTML(priceLabel(raw))}</p>${stockInfo(raw)}</article>`;}).join('');
  $('#empty-search').hidden=found.length>0;
  $('#catalog-count').textContent=`Показано ${found.length} из ${matching.length} решений`;
  syncSaveButtons();
 }
 function renderSelection(){
  const found=products.filter(p=>selection.includes(p.id));
- $('#selected-products').innerHTML=found.length?found.map(raw=>{const p=displayProduct(raw);return `<article class="selected-product"><img src="${p.image}" alt="${p.name}" width="75" height="85"><div><h3>${p.name}</h3><p>${categoryLabels[p.category]}</p></div><button class="remove-product" data-remove="${p.id}" aria-label="Удалить из подборки: ${p.name}">×</button></article>`;}).join(''):'<div class="selection-empty">Здесь появятся решения, которые вам понравились.<button class="text-link" id="browse-catalog">Посмотреть коллекцию <span>↗</span></button></div>';
+ $('#selected-products').innerHTML=found.length?found.map(raw=>{const p=displayProduct(raw);return `<article class="selected-product"><img src="${p.image}" alt="${p.name}" width="75" height="85"><div><h3>${p.name}</h3><p>${categoryLabels[p.category]}</p></div><button class="remove-product" data-remove="${p.id}" aria-label="Удалить из подборки: ${p.name}">×</button></article>`;}).join(''):'<div class="selection-empty">Здесь появятся решения, которые вам понравились.<button class="text-link" id="browse-catalog">Посмотреть коллекцию <span>›</span></button></div>';
 }
 function updateModalState(){document.body.classList.toggle('modal-open',!!$('dialog[open]'));}
 function openDialog(id){const dlg=$(id);if(dlg.open)return;dlg.showModal();updateModalState();}
 function openProduct(id){
  const raw=products.find(p=>p.id===id);if(!raw)return;const p=displayProduct(raw);openProductId=id;
- $('#product-content').innerHTML=`<div class="product-layout"><img class="product-image" src="${p.image}" alt="${p.name}"><div class="product-detail"><p class="eyebrow">${categoryLabels[p.category]}</p><h2 id="product-title">${p.name}</h2><p class="product-description">${p.description}</p><ul class="product-specs">${p.details.map(d=>`<li>${d}</li>`).join('')}</ul><p class="product-source">${p.source}</p><button class="dark-button" data-save="${p.id}" aria-pressed="false">В мою подборку <span>+</span></button><p class="product-disclaimer"><a class="text-link" href="catalog.html?product=${p.id}">Страница изделия и чертежи ↗</a><br>Изображение показывает вариант решения. Наличие, размеры, состав и стоимость уточняются при обсуждении проекта.</p></div></div>`;
+ $('#product-content').innerHTML=`<div class="product-layout"><img class="product-image" src="${p.image}" alt="${p.name}"><div class="product-detail"><p class="eyebrow">${categoryLabels[p.category]}</p><h2 id="product-title">${p.name}</h2><p class="product-description">${p.description}</p>${stockInfo(raw,true)}<ul class="product-specs">${p.details.map(d=>`<li>${d}</li>`).join('')}</ul><p class="product-source">${p.source}</p><button class="dark-button" data-save="${p.id}" aria-pressed="false">В мою подборку <span>+</span></button><p class="product-disclaimer"><a class="text-link" href="catalog.html?product=${p.id}">Страница изделия и чертежи ›</a><br>Изображение показывает вариант решения. Наличие, размеры, состав и стоимость уточняются при обсуждении проекта.</p></div></div>`;
  syncSaveButtons();openDialog('#product-dialog');
 }
 $$('dialog').forEach(dlg=>{
@@ -61,7 +63,7 @@ $$('[data-filter]').forEach(button=>button.addEventListener('click',()=>{filter=
 $('#catalog-search').addEventListener('input',e=>{query=e.target.value;renderCatalog();});
 $('#reset-search').addEventListener('click',()=>{query='';filter='all';$('#catalog-search').value='';$$('[data-filter]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.filter==='all')));renderCatalog();$('#catalog-search').focus();});
 
-const captions=['01 / Стекло и тонкие линии','02 / Тёплая палитра','03 / Открытая архитектура'];
+const captions=['Стекло и тонкие линии','Тёплая палитра','Открытая архитектура'];
 $$('[data-slide]').forEach(button=>button.addEventListener('click',()=>{const i=Number(button.dataset.slide);$$('.hero-img').forEach((img,j)=>img.classList.toggle('active',j===i));$$('[data-slide]').forEach((b,j)=>{b.classList.toggle('active',j===i);b.setAttribute('aria-pressed',String(j===i));});$('#slide-caption').textContent=captions[i];}));
 
 let imageJobs=new WeakMap();
@@ -73,7 +75,7 @@ function changeImage(el,src,alt){
 $$('[data-inside]').forEach(button=>button.addEventListener('click',()=>{insideId=button.dataset.inside;const p=products.find(p=>p.id===insideId);$('#inside-details').disabled=!p;if(!p)return;changeImage($('#inside-photo'),p.image,p.name);$('#inside-photo-note').textContent=p.source;$$('[data-inside]').forEach(b=>{b.classList.toggle('selected',b===button);b.setAttribute('aria-pressed',String(b===button));});}));
 $('#inside-details').addEventListener('click',()=>openProduct(insideId));
 const palettes=[{title:'Графит<br><em>и стекло.</em>',description:'Чёткая линия профиля, глубина тёмных оттенков и прозрачность стекла. Выразительно, но спокойно.',product:'glass-dark'},{title:'Тёплая<br><em>бронза.</em>',description:'Тёплые оттенки профиля, мягкий свет и стеклянные фасады. Гардеробная, которая продолжает палитру вашего дома.',product:'glass-bronze'},{title:'Мягкий<br><em>свет.</em>',description:'Светлая палитра и деликатная фактура стекла. Воздушное решение с ощущением спокойствия и простора.',product:'glass-soft'}];
-$$('[data-material]').forEach(button=>button.addEventListener('click',()=>{materialIndex=Number(button.dataset.material);const palette=palettes[materialIndex],p=products.find(p=>p.id===palette.product);$('#material-title').innerHTML=palette.title;$('#material-description').textContent=palette.description;$('#material-index').textContent=`0${materialIndex+1} — 03`;if(p)changeImage($('#material-photo'),p.image,p.name);$$('[data-material]').forEach(b=>{b.classList.toggle('selected',b===button);b.setAttribute('aria-pressed',String(b===button));});syncSaveButtons();}));
+$$('[data-material]').forEach(button=>button.addEventListener('click',()=>{materialIndex=Number(button.dataset.material);const palette=palettes[materialIndex],p=products.find(p=>p.id===palette.product);$('#material-title').innerHTML=palette.title;$('#material-description').textContent=palette.description;if(p)changeImage($('#material-photo'),p.image,p.name);$$('[data-material]').forEach(b=>{b.classList.toggle('selected',b===button);b.setAttribute('aria-pressed',String(b===button));});syncSaveButtons();}));
 $('#material-save').addEventListener('click',()=>toggleProduct(palettes[materialIndex].product));
 
 $('#payment-to-selection').addEventListener('click',()=>{$('#payment-dialog').close();renderSelection();openDialog('#collection-dialog');});
@@ -99,3 +101,5 @@ $('#inside-details').disabled=!products.some(p=>p.id===insideId);
 if($('#inside-details').disabled)$$('[data-inside]').find(button=>!button.disabled)?.click();
 $('[data-filter="all"] sup').textContent=String(products.length).padStart(2,'0');
 syncCounts();renderCatalog();renderSelection();onScroll();
+
+function stockInfo(product,detail=false){const info=availabilityText(product,language);return `<div class="product-availability" data-status="${info.status}" data-no-translate><span><i aria-hidden="true"></i>${escapeHTML(info.label)}</span><small>${escapeHTML(info.timing)}</small>${detail&&info.note?`<small class="lead-time-note">${escapeHTML(info.note)}</small>`:''}</div>`;}

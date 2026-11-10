@@ -8,10 +8,10 @@ const footer=document.createElement('section');footer.className='site-details';f
 footer.innerHTML=`<div><strong>${escape(business.name)}</strong><span>${({ru:'БИН',kk:'БСН',en:'BIN'})[language]} ${business.bin}</span><span>${escape(business.address[language])}</span><a href="${business.telephone}">${business.phone}</a></div><nav aria-label="${escape(copy.business)}">${['business','privacy','terms','refund','cookies'].map(key=>`<a href="${link(key)}">${copy[key]}</a>`).join('')}<button type="button" data-cookie-settings>${copy.settings}</button></nav>`;
 (document.querySelector('main')||document.body).append(footer);
 const banner=document.createElement('aside');banner.id='cookie-banner';banner.className='cookie-banner';banner.dataset.noTranslate='';banner.setAttribute('aria-labelledby','cookie-title');banner.hidden=!!consent();
-banner.innerHTML=`<div><p class="eyebrow">IKIGAI / PRIVACY</p><h2 id="cookie-title">${ui.title}</h2><p>${ui.description} <a href="${link('cookies')}">${copy.cookies} ↗</a></p><p class="cookie-error" role="status"></p></div><div class="cookie-actions"><button type="button" class="consent-choice" data-choice="no">${ui.necessary}</button><button type="button" class="consent-choice" data-choice="yes">${ui.allow}</button><button type="button" class="consent-settings" data-cookie-settings>${ui.manage}</button></div>`;
+banner.innerHTML=`<div><p class="eyebrow">IKIGAI / PRIVACY</p><h2 id="cookie-title">${ui.title}</h2><p>${ui.description} <a href="${link('cookies')}">${copy.cookies} ›</a></p><p class="cookie-error" role="status"></p></div><div class="cookie-actions"><button type="button" class="consent-choice" data-choice="no">${ui.necessary}</button><button type="button" class="consent-choice" data-choice="yes">${ui.allow}</button><button type="button" class="consent-settings" data-cookie-settings>${ui.manage}</button></div>`;
 document.body.append(banner);
 const dialog=document.createElement('dialog');dialog.id='cookie-dialog';dialog.className='cookie-dialog';dialog.dataset.noTranslate='';dialog.setAttribute('aria-labelledby','cookie-settings-title');
-dialog.innerHTML=`<button type="button" class="dialog-close" aria-label="${ui.close}">×</button><p class="eyebrow">IKIGAI / PRIVACY</p><h2 id="cookie-settings-title">${copy.settings}</h2><p>${ui.note}</p><label><input id="cookie-preferences" type="checkbox"><span>${ui.label}</span></label><a href="${link('cookies')}">${copy.cookies} ↗</a><p class="cookie-error" role="status"></p><button type="button" class="dark-button" id="save-cookie-choice">${ui.save}<span>↗</span></button>`;
+dialog.innerHTML=`<button type="button" class="dialog-close" aria-label="${ui.close}">×</button><p class="eyebrow">IKIGAI / PRIVACY</p><h2 id="cookie-settings-title">${copy.settings}</h2><p>${ui.note}</p><label><input id="cookie-preferences" type="checkbox"><span>${ui.label}</span></label><a href="${link('cookies')}">${copy.cookies} ›</a><p class="cookie-error" role="status"></p><button type="button" class="dark-button" id="save-cookie-choice">${ui.save}<span>›</span></button>`;
 document.body.append(dialog);
 function choose(value){
  try{saveConsent(value);banner.hidden=true;dialog.close();location.reload();}
@@ -27,7 +27,7 @@ addEventListener('storage',event=>{if(event.key===CONSENT_KEY)location.reload();
 function formNotes(root){
  for(const form of root.querySelectorAll('form:not(#product-form)')){
   if(!['contact-form','selection-form','fit-form'].includes(form.id)||form.querySelector('.privacy-form-note'))continue;
-  const note=document.createElement('p');note.className='privacy-form-note';note.dataset.noTranslate='';note.innerHTML=`${ui.form} <a href="${link('privacy')}">${ui.read} ↗</a>`;form.append(note);
+  const note=document.createElement('p');note.className='privacy-form-note';note.dataset.noTranslate='';note.innerHTML=`${ui.form} <a href="${link('privacy')}">${ui.read} ›</a>`;form.append(note);
  }
  for(const anchor of root.querySelectorAll('a[href*="downloads/meidu-2026.pdf"]'))anchor.title=ui.source;
 }

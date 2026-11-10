@@ -28,6 +28,7 @@ function openProduct(product){
  $('#product-preview').hidden=product.isNew||product.visible===false;$('#product-preview').href='catalog.html?product='+encodeURIComponent(product.id);
  field('category').innerHTML=catalog.categories.map(c=>`<option value="${e(c.id)}">${e(c.name)}</option>`).join('');field('category').value=product.category;updateSeries(product.series);
  for(const name of ['name','model','tag','description','priceUnit'])field(name).value=product[name]||'';
+ field('availability').value=product.availability||'unknown';field('leadTimeMin').value=product.leadTimeMin??'';field('leadTimeMax').value=product.leadTimeMax??'';
  field('details').value=(product.details||[]).join('\n');field('price').value=product.price??'';field('priceFrom').checked=product.priceFrom===true;field('visible').checked=product.visible!==false;
  for(const lang of ['kk','en']){const translated=localizeCatalog({...catalog,products:[product]},lang).products[0];for(const name of ['name','tag','description','details']){const value=product.translations?.[lang]?.[name]??(JSON.stringify(translated[name])!==JSON.stringify(product[name])?translated[name]:'');field(lang+'_'+name).value=Array.isArray(value)?value.join('\n'):value||'';}}
  showPhoto();$('#photo-status').textContent='';status('');renderList();
@@ -57,6 +58,7 @@ $('#photo-file').addEventListener('change',async event=>{
 form.addEventListener('submit',async event=>{
  event.preventDefault();if(busy)return;if(!current.image){status('Сначала загрузите фотографию товара.',true);$('#photo-file').focus();return;}
  const values=Object.fromEntries(new FormData(form)),product={...current,...values,details:values.details.split(/\r?\n/).map(s=>s.trim()).filter(Boolean),price:values.price===''?null:Number(values.price),priceFrom:field('priceFrom').checked,visible:field('visible').checked};
+ product.leadTimeMin=values.leadTimeMin===''?null:Number(values.leadTimeMin);product.leadTimeMax=values.leadTimeMax===''?null:Number(values.leadTimeMax);
  product.translations={};for(const lang of ['kk','en']){const copy={};for(const name of ['name','tag','description']){const value=values[lang+'_'+name]?.trim();if(value)copy[name]=value;}const details=values[lang+'_details'].split(/\r?\n/).map(v=>v.trim()).filter(Boolean);if(details.length)copy.details=details;if(Object.keys(copy).length)product.translations[lang]=copy;for(const name of ['name','tag','description','details'])delete product[lang+'_'+name];}
  locked(true);status('Сохраняем изменения…');
  try{const {product:saved}=await api('/api/admin/product',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({product,revision:current.revision})});const index=catalog.products.findIndex(p=>p.id===saved.id);if(index<0)catalog.products.unshift(saved);else catalog.products[index]=saved;openProduct(saved);status(saved.visible?'Сохранено. Изменения уже доступны на сайте.':'Сохранено. Товар скрыт с сайта.');}

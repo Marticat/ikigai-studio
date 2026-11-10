@@ -58,7 +58,7 @@ function render(){
  $('#estimate-range').textContent=formatMoney(estimate.low)+' – '+formatMoney(estimate.high);
  $('#estimate-lines').innerHTML=estimate.lines.map(line=>`<div><span>${line.label}</span><span>${formatMoney(line.amount)}</span></div>`).join('')+`<div class="estimate-subtotal"><span>Условный расчёт</span><span>${formatMoney(estimate.total)}</span></div>`;
  $('#config-enquiry').href=configEnquiry(config);
- const button=$('#toggle-doors');button.disabled=config.glass==='open';button.setAttribute('aria-pressed',String(doorsOpen&&config.glass!=='open'));button.innerHTML=config.glass==='open'?'Открытая система <span>✓</span>':doorsOpen?'Закрыть фасады <span>↙</span>':'Рассмотреть внутри <span>↗</span>';
+ const button=$('#toggle-doors');button.disabled=config.glass==='open';button.setAttribute('aria-pressed',String(doorsOpen&&config.glass!=='open'));button.innerHTML=config.glass==='open'?'Открытая система <span>✓</span>':doorsOpen?'Закрыть фасады <span>‹</span>':'Рассмотреть внутри <span>›</span>';
 }
 $$('[data-key]').forEach(button=>button.addEventListener('click',()=>{config=normalizeConfig({...config,[button.dataset.key]:button.dataset.value});if(button.dataset.key==='glass')doorsOpen=false;save();render();}));
 for(const dimension of ['width','height'])$('#config-'+dimension).addEventListener('input',event=>{config=normalizeConfig({...config,[dimension]:event.target.value});save();render();});

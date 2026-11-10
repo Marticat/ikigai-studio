@@ -27,7 +27,7 @@ export function translate(value,lang=language){
   const total=text.match(/^(\d+) товаров · (\d+) на сайте$/);if(total)result=lang==='en'?`${total[1]} products · ${total[2]} visible`:`${total[1]} тауар · ${total[2]} сайтта`;
   if(result===undefined&&text.includes(' · '))result=text.split(' · ').map(s=>translate(s,lang)).join(' · ');
   if(result===undefined&&text.includes(': ')){const at=text.indexOf(': ');result=translate(text.slice(0,at),lang)+': '+translate(text.slice(at+2),lang);}
-  if(result===undefined&&/[↗↙↓↑+✓↻]$/.test(text))result=translate(text.slice(0,-1).trim(),lang)+' '+text.slice(-1);
+  if(result===undefined&&/[›‹↓↑+✓↻]$/.test(text))result=translate(text.slice(0,-1).trim(),lang)+' '+text.slice(-1);
   if(result===undefined&&/^\d{2} \/ /.test(text))result=text.slice(0,5)+translate(text.slice(5),lang);
   if(result===undefined&&text.startsWith('IKIGAI / '))result='IKIGAI / '+translate(text.slice(9),lang);
   if(result===undefined&&text.endsWith(' — IKIGAI'))result=translate(text.slice(0,-9),lang)+' — IKIGAI';
