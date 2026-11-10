@@ -5,25 +5,27 @@ const $=(s,root=document)=>root.querySelector(s);
 const $$=(s,root=document)=>[...root.querySelectorAll(s)];
 const displayProduct=p=>Object.fromEntries(Object.entries(p).map(([key,value])=>[key,Array.isArray(value)?value.map(escapeHTML):escapeHTML(value)]));
 const storageKey='ikigai-wardrobe-selection-v1';
-let selection=[];
-try{selection=restoreSelection(localStorage.getItem(storageKey),products);}catch{}
+let selection=[],sessionOnly=false;
+if(!sessionOnly)try{selection=restoreSelection(localStorage.getItem(storageKey),products);}catch{}
 let filter='all',query='',insideId='accessories',materialIndex=0,openProductId=null;
 let toastTimer;
 const reduced=window.matchMedia('(prefers-reduced-motion: reduce)');
 const grid=$('#catalog-grid');
 function announce(text){clearTimeout(toastTimer);$('#toast').textContent=text;$('#toast').classList.add('visible');toastTimer=setTimeout(()=>$('#toast').classList.remove('visible'),2600);}
 function syncCounts(){$$('[data-count]').forEach(el=>{el.textContent=selection.length;});}
-function saveSelection(){let persisted=true;try{localStorage.setItem(storageKey,JSON.stringify(selection));}catch{persisted=false;}syncCounts();return persisted;}
+function saveSelection(){let persisted=true;try{localStorage.setItem(storageKey,JSON.stringify(selection));}catch{persisted=false;sessionOnly=true;}syncCounts();return persisted;}
 function syncSaveButtons(){
  $$('[data-save]').forEach(button=>{const saved=selection.includes(button.dataset.save),p=products.find(p=>p.id===button.dataset.save);button.setAttribute('aria-pressed',String(saved));if(button.classList.contains('save-button')){button.textContent=saved?'✓':'+';button.setAttribute('aria-label',`${saved?'Убрать из подборки':'Добавить в подборку'}: ${p.name}`);}else{button.innerHTML=saved?'В подборке <span>✓</span>':'В мою подборку <span>+</span>';}});
  const state=featuredState(products,selection,palettes[materialIndex].product);$('#material-save').disabled=!state.available;if(!state.available){$('#material-save').textContent='Решение обновляется';return;}$('#material-save').innerHTML=state.selected?'Решение в подборке <span>✓</span>':'Добавить решение в подборку <span>+</span>';
 }
-function toggleProduct(id){if(!products.some(p=>p.id===id))return;selection=toggleSelection(selection,id);const persisted=saveSelection();syncSaveButtons();renderSelection();announce(!persisted?'Подборка доступна до закрытия этой вкладки.':selection.includes(id)?'Решение добавлено в вашу подборку':'Решение убрано из подборки');}
+function toggleProduct(id){if(!products.some(p=>p.id===id))return;if(!sessionOnly)try{selection=restoreSelection(localStorage.getItem(storageKey),products);}catch{}selection=toggleSelection(selection,id);const persisted=saveSelection();syncSaveButtons();renderSelection();announce(!persisted?'Подборка доступна до закрытия этой вкладки.':selection.includes(id)?'Решение добавлено в вашу подборку':'Решение убрано из подборки');}
 function renderCatalog(){
- const found=filterProducts(products,filter,query);
- grid.innerHTML=found.map(raw=>{const p=displayProduct(raw);return `<article class="product-card"><div class="card-media"><button class="card-open" data-product="${p.id}" aria-label="Рассмотреть: ${p.name}"><img src="${p.image}" alt="${p.name}" loading="lazy" width="800" height="1000"><span class="card-index">${String(products.findIndex(item=>item.id===raw.id)+1).padStart(2,'0')}</span><span class="card-explore" aria-hidden="true">↗</span></button><button class="save-button" data-save="${p.id}" aria-pressed="${selection.includes(p.id)}" aria-label="Добавить в подборку: ${p.name}">+</button></div><div class="card-label"><span>${p.tag}</span></div><h3 class="card-title"><button data-product="${p.id}">${p.name}</button></h3><p class="card-price">По индивидуальному расчёту</p></article>`;}).join('');
+ const preferred=['glass-dark','meidu-062','accessories','shelves','meidu-044','meidu-067'];
+ const ordered=[...preferred.map(id=>products.find(p=>p.id===id)).filter(Boolean),...products.filter(p=>!preferred.includes(p.id))];
+ const matching=filterProducts(ordered,filter,query),found=matching.slice(0,6);
+ grid.innerHTML=found.map(raw=>{const p=displayProduct(raw);return `<article class="product-card"><div class="card-media"><a class="card-open" href="catalog.html?product=${p.id}" aria-label="Рассмотреть: ${p.name}"><img src="${p.image}" alt="${p.name}" loading="lazy" width="800" height="1000"><span class="card-index">${String(products.findIndex(item=>item.id===raw.id)+1).padStart(2,'0')}</span><span class="card-explore" aria-hidden="true">↗</span></a><button class="save-button" data-save="${p.id}" aria-pressed="${selection.includes(p.id)}" aria-label="Добавить в подборку: ${p.name}">+</button></div><div class="card-label"><span>${p.tag}</span></div><h3 class="card-title"><a href="catalog.html?product=${p.id}">${p.name}</a></h3><p class="card-price">По индивидуальному расчёту</p></article>`;}).join('');
  $('#empty-search').hidden=found.length>0;
- $('#catalog-count').textContent=`Показано ${found.length} из ${products.length} решений`;
+ $('#catalog-count').textContent=`Показано ${found.length} из ${matching.length} решений`;
  syncSaveButtons();
 }
 function renderSelection(){
@@ -34,7 +36,7 @@ function updateModalState(){document.body.classList.toggle('modal-open',!!$('dia
 function openDialog(id){const dlg=$(id);if(dlg.open)return;dlg.showModal();updateModalState();}
 function openProduct(id){
  const raw=products.find(p=>p.id===id);if(!raw)return;const p=displayProduct(raw);openProductId=id;
- $('#product-content').innerHTML=`<div class="product-layout"><img class="product-image" src="${p.image}" alt="${p.name}"><div class="product-detail"><p class="eyebrow">${categoryLabels[p.category]}</p><h2 id="product-title">${p.name}</h2><p class="product-description">${p.description}</p><ul class="product-specs">${p.details.map(d=>`<li>${d}</li>`).join('')}</ul><p class="product-source">${p.source}</p><button class="dark-button" data-save="${p.id}" aria-pressed="false">В мою подборку <span>+</span></button><p class="product-disclaimer">Изображение показывает вариант решения. Наличие, размеры, состав и стоимость уточняются при обсуждении проекта.</p></div></div>`;
+ $('#product-content').innerHTML=`<div class="product-layout"><img class="product-image" src="${p.image}" alt="${p.name}"><div class="product-detail"><p class="eyebrow">${categoryLabels[p.category]}</p><h2 id="product-title">${p.name}</h2><p class="product-description">${p.description}</p><ul class="product-specs">${p.details.map(d=>`<li>${d}</li>`).join('')}</ul><p class="product-source">${p.source}</p><button class="dark-button" data-save="${p.id}" aria-pressed="false">В мою подборку <span>+</span></button><p class="product-disclaimer"><a class="text-link" href="catalog.html?product=${p.id}">Страница изделия и чертежи ↗</a><br>Изображение показывает вариант решения. Наличие, размеры, состав и стоимость уточняются при обсуждении проекта.</p></div></div>`;
  syncSaveButtons();openDialog('#product-dialog');
 }
 $$('dialog').forEach(dlg=>{
@@ -64,7 +66,7 @@ function changeImage(el,src,alt){
  const ready=()=>{if(imageJobs.get(el)!==token)return;el.style.opacity='0';setTimeout(()=>{if(imageJobs.get(el)!==token)return;el.src=src;el.alt=alt;el.style.opacity='1';},reduced.matches?0:180);};
  if(loader.complete)ready();else{loader.onload=ready;loader.onerror=()=>{el.style.opacity='1';};}
 }
-$$('[data-inside]').forEach(button=>button.addEventListener('click',()=>{insideId=button.dataset.inside;const p=products.find(p=>p.id===insideId);if(!p)return;changeImage($('#inside-photo'),p.image,p.name);$('#inside-photo-note').textContent=insideId==='accessories'?'Вдохновение / детали хранения':p.source;$$('[data-inside]').forEach(b=>{b.classList.toggle('selected',b===button);b.setAttribute('aria-pressed',String(b===button));});}));
+$$('[data-inside]').forEach(button=>button.addEventListener('click',()=>{insideId=button.dataset.inside;const p=products.find(p=>p.id===insideId);if(!p)return;changeImage($('#inside-photo'),p.image,p.name);$('#inside-photo-note').textContent=p.source;$$('[data-inside]').forEach(b=>{b.classList.toggle('selected',b===button);b.setAttribute('aria-pressed',String(b===button));});}));
 $('#inside-details').addEventListener('click',()=>openProduct(insideId));
 const palettes=[{title:'Графит<br><em>и стекло.</em>',description:'Чёткая линия профиля, глубина тёмных оттенков и прозрачность стекла. Выразительно, но спокойно.',product:'glass-dark'},{title:'Тёплая<br><em>бронза.</em>',description:'Тёплые оттенки профиля, мягкий свет и стеклянные фасады. Гардеробная, которая продолжает палитру вашего дома.',product:'glass-bronze'},{title:'Мягкий<br><em>свет.</em>',description:'Светлая палитра и деликатная фактура стекла. Воздушное решение с ощущением спокойствия и простора.',product:'glass-soft'}];
 $$('[data-material]').forEach(button=>button.addEventListener('click',()=>{materialIndex=Number(button.dataset.material);const palette=palettes[materialIndex],p=products.find(p=>p.id===palette.product);$('#material-title').innerHTML=palette.title;$('#material-description').textContent=palette.description;$('#material-index').textContent=`0${materialIndex+1} — 03`;if(p)changeImage($('#material-photo'),p.image,p.name);$$('[data-material]').forEach(b=>{b.classList.toggle('selected',b===button);b.setAttribute('aria-pressed',String(b===button));});syncSaveButtons();}));
@@ -91,6 +93,8 @@ function onScroll(){
  if(pending)return;pending=true;requestAnimationFrame(()=>{const max=document.documentElement.scrollHeight-innerHeight;$('.progress i').style.transform=`scaleX(${max>0?scrollY/max:0})`;let active=sections[0];for(const s of sections)if(s.getBoundingClientRect().top<innerHeight*.4)active=s;$$('#main-nav a').forEach(a=>{const current=a.getAttribute('href')==='#'+active.id;a.classList.toggle('active',current);if(current)a.setAttribute('aria-current','location');else a.removeAttribute('aria-current');});pending=false;});
 }
 addEventListener('scroll',onScroll,{passive:true});
+addEventListener('storage',event=>{if(event.key===storageKey){selection=restoreSelection(event.newValue,products);syncCounts();syncSaveButtons();renderSelection();}});
+addEventListener('pageshow',()=>{if(!sessionOnly)try{selection=restoreSelection(localStorage.getItem(storageKey),products);}catch{}syncCounts();syncSaveButtons();renderSelection();});
 $$('[data-inside]').forEach(b=>{b.disabled=!products.some(p=>p.id===b.dataset.inside);});
 $('#inside-details').disabled=!products.some(p=>p.id===insideId);
 $('[data-filter="all"] sup').textContent=String(products.length).padStart(2,'0');
