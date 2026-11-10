@@ -1,7 +1,8 @@
+import {localizeCatalog} from './i18n.mjs';
 export async function loadCatalog(){
  const response=await fetch('/api/catalog',{cache:'no-store'});
  if(!response.ok)throw new Error('Каталог временно недоступен.');
- return response.json();
+ return localizeCatalog(await response.json());
 }
 export function catalogUnavailable(){
  const panel=document.createElement('div');panel.className='catalog-load-error';panel.setAttribute('role','alert');

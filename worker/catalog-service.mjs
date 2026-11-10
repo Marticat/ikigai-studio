@@ -24,7 +24,19 @@ export function validateProduct(raw){
  if(price===null||price==='')price=null;else if(typeof price!=='number'||!Number.isFinite(price)||price<=0||price>100000000||Math.round(price)!==price)throw new Error('Цена должна быть целым числом от 1 до 100 000 000 ₸.');
  if(!['piece','set','meter'].includes(raw.priceUnit))throw new Error('Выберите единицу цены.');
  if(!Array.isArray(raw.details)||raw.details.length>20)throw new Error('Не более 20 характеристик.');
- return {id,page:original?.page??null,category:category.id,series:series.id,seriesName:series.name,sourceName:original?.sourceName||'',source:original?.source||'Каталог IKIGAI',name:string(raw.name,150,true),model:raw.model?string(raw.model,80):null,tag:string(raw.tag||series.name,120),description:string(raw.description,3000,true),details:raw.details.map(v=>string(v,300,true)),image:asset(raw.image),sheet:raw.sheet?asset(raw.sheet):asset(raw.image),price,priceUnit:raw.priceUnit,priceFrom:raw.priceFrom===true,visible:raw.visible!==false};
+ const translations={};
+ if(raw.translations!=null){
+  if(typeof raw.translations!=='object'||Array.isArray(raw.translations))throw new Error('Неверные данные переводов.');
+  for(const lang of ['kk','en']){
+   const value=raw.translations[lang];if(value==null)continue;
+   if(typeof value!=='object'||Array.isArray(value))throw new Error('Неверные данные переводов.');
+   const copy={};
+   for(const [field,max] of [['name',150],['description',3000],['tag',120]])if(value[field]!=null&&value[field]!=='')copy[field]=string(value[field],max);
+   if(value.details!=null){if(!Array.isArray(value.details)||value.details.length>20)throw new Error('Не более 20 характеристик.');if(value.details.length)copy.details=value.details.map(v=>string(v,300,true));}
+   if(Object.keys(copy).length)translations[lang]=copy;
+  }
+ }
+ return {id,page:original?.page??null,category:category.id,series:series.id,seriesName:series.name,sourceName:original?.sourceName||'',source:original?.source||'Каталог IKIGAI',name:string(raw.name,150,true),model:raw.model?string(raw.model,80):null,tag:string(raw.tag||series.name,120),description:string(raw.description,3000,true),details:raw.details.map(v=>string(v,300,true)),image:asset(raw.image),sheet:raw.sheet?asset(raw.sheet):asset(raw.image),price,priceUnit:raw.priceUnit,priceFrom:raw.priceFrom===true,visible:raw.visible!==false,translations};
 }
 export function validateImage(bytes,type){
  if(bytes.byteLength>5*1024*1024)throw new Error('Фотография должна быть меньше 5 МБ.');

@@ -1,3 +1,4 @@
+import {language,t,localeCode} from './i18n.mjs';
 import {normalizeConfig} from './configurator-model.mjs';
 import {createEnquiry} from './store.mjs';
 export const kits=[
@@ -9,10 +10,10 @@ export function initialKitConfig(id,saved){return normalizeConfig(kits.find(k=>k
 export function fitEnquiry(product,{width,height,depth,comment=''}={}){
  const values=[width,height,depth].map(v=>Number(String(v??'').trim().replace(',','.')));
  if(values.some(v=>!Number.isFinite(v)||v<1||v>10000))throw new Error('Укажите три размера от 1 до 10 000 мм.');
- return createEnquiry([product],[product.id],{dimensions:`Внутренние размеры шкафа (Ш × В × Г): ${values.join(' × ')} мм`,comment:`Подскажите, подойдёт ли выбранное изделие для моего шкафа.${comment.trim()?' '+comment.trim().slice(0,1000):''}`});
+ return createEnquiry([product],[product.id],{dimensions:({ru:'Внутренние размеры шкафа (Ш × В × Г)',kk:'Шкафтың ішкі өлшемдері (Е × Б × Т)',en:'Internal wardrobe dimensions (W × H × D)'})[language]+': '+values.join(' × ')+(language==='en'?' mm':' мм'),comment:({ru:'Подскажите, подойдёт ли выбранное изделие для моего шкафа.',kk:'Таңдалған бұйым менің шкафыма сәйкес келе ме?',en:'Please check whether the selected item will fit my wardrobe.'})[language]+(comment.trim()?' '+comment.trim().slice(0,1000):'')});
 }
 export function priceLabel(p){
- if(p.price==null||!Number.isFinite(Number(p.price))||Number(p.price)<=0)return 'Цена по запросу';
+ if(p.price==null||!Number.isFinite(Number(p.price))||Number(p.price)<=0)return t('Цена по запросу');
  const units={piece:'шт.',set:'комплект',meter:'пог. м'};
- return `${p.priceFrom?'от ':''}${new Intl.NumberFormat('ru-RU').format(Number(p.price))} ₸ / ${units[p.priceUnit]||'шт.'}`;
+ return `${p.priceFrom?({ru:'от ',kk:'бастап ',en:'from '})[language]:''}${new Intl.NumberFormat(localeCode()).format(Number(p.price))} ₸ / ${t(units[p.priceUnit]||'шт.')}`;
 }

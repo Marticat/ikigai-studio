@@ -1,3 +1,4 @@
+import {preferenceStorage,preferencesEnabled} from './privacy-storage.mjs';
 import {defaultConfig,normalizeConfig,presets,estimateConfig,formatMoney,configEnquiry} from './configurator-model.mjs';
 import {initialKitConfig,kits} from './order-model.mjs';
 import {wardrobeScene} from './configurator-scene.mjs';
@@ -39,10 +40,10 @@ async function renderScene(){
   view='schematic';syncView();$('#wardrobe-scene').innerHTML=wardrobeScene(snapshot,{doorsOpen:previewOpen});$('#wardrobe-scene').setAttribute('aria-busy','false');$('#photo-status').textContent='Фото не загрузилось — доступна схема.';
  }
 }
-try{config=normalizeConfig(JSON.parse(localStorage.getItem(key)));}catch{}
+try{config=normalizeConfig(JSON.parse(preferenceStorage.getItem(key)));}catch{}
 const activeKit=kits.find(k=>k.id===new URLSearchParams(location.search).get('kit'));
 if(activeKit){config=initialKitConfig(activeKit.id,config);$('#kit-context').hidden=false;$('#kit-context strong').textContent=activeKit.name;}
-function save(){try{localStorage.setItem(key,JSON.stringify(config));$('#config-save-status').textContent='Эскиз сохранён в этом браузере.';}catch{$('#config-save-status').textContent='Эскиз доступен до закрытия вкладки.';}}
+function save(){try{preferenceStorage.setItem(key,JSON.stringify(config));$('#config-save-status').textContent=preferencesEnabled()?'Эскиз сохранён в этом браузере.':'Эскиз доступен до закрытия вкладки.';}catch{$('#config-save-status').textContent='Эскиз доступен до закрытия вкладки.';}}
 function render(){
  const preset=presets[config.preset],estimate=estimateConfig(config);
  renderScene();
@@ -69,8 +70,9 @@ function closeMenu(){menu.setAttribute('aria-expanded','false');menu.setAttribut
 menu.addEventListener('click',()=>{const open=menu.getAttribute('aria-expanded')!=='true';menu.setAttribute('aria-expanded',String(open));menu.setAttribute('aria-label',open?'Закрыть меню':'Открыть меню');nav.classList.toggle('open',open);});
 document.addEventListener('keydown',event=>{if(event.key==='Escape'&&nav.classList.contains('open')){closeMenu();menu.focus();}});
 addEventListener('resize',()=>{if(innerWidth>960)closeMenu();},{passive:true});
-addEventListener('storage',event=>{if(event.key===key){try{config=normalizeConfig(JSON.parse(event.newValue));}catch{config={...defaultConfig};}doorsOpen=false;render();}});
+addEventListener('storage',event=>{if(preferencesEnabled()&&event.key===key){try{config=normalizeConfig(JSON.parse(event.newValue));}catch{config={...defaultConfig};}doorsOpen=false;render();}});
 if(activeKit)save();
+if(!preferencesEnabled())$('#config-save-status').textContent='Эскиз доступен до закрытия вкладки.';
 render();
 // Warm the other two local plates without risking unhandled rejection.
 Promise.allSettled(Object.values(photoAssets).map(loadPhoto));

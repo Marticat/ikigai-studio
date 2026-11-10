@@ -1,3 +1,4 @@
+import {t,localizeCatalog} from './i18n.mjs';
 import {escapeHTML as e} from './store.mjs';
 import {priceLabel} from './order-model.mjs';
 const $=s=>document.querySelector(s),form=$('#product-form');
@@ -6,9 +7,9 @@ const field=name=>form.elements.namedItem(name);
 async function api(path,options={}){const response=await fetch(path,{...options,cache:'no-store',headers:{'X-IKIGAI-Admin':'1',...options.headers}});let data;try{data=await response.json();}catch{throw new Error('Нет ответа от сервера. Изменения пока не сохранены.');}if(!response.ok)throw Object.assign(new Error(data.error||'Не удалось выполнить действие.'),{status:response.status});return data;}
 function status(text,error=false){$('#save-status').textContent=text;$('#save-status').dataset.error=String(error);}
 function locked(value){busy=value;$('#product-fields').disabled=value;$('#save-product').disabled=value;$('#new-product').disabled=value;document.querySelectorAll('.admin-item').forEach(b=>b.disabled=value);}
-function canLeave(){return !dirty||confirm('Есть несохранённые изменения. Перейти без сохранения?');}
+function canLeave(){return !dirty||confirm(t('Есть несохранённые изменения. Перейти без сохранения?'));}
 function renderList(){
- const query=$('#admin-search').value.trim().toLowerCase();const found=catalog.products.filter(p=>`${p.name} ${p.model||''} ${p.seriesName}`.toLowerCase().includes(query));
+ const query=$('#admin-search').value.trim().toLowerCase();const localized=localizeCatalog(catalog);const found=catalog.products.filter(p=>{const display=localized.products.find(item=>item.id===p.id);return [p.name,p.model,p.seriesName,display?.name,display?.seriesName,...Object.values(p.translations||{}).map(value=>value.name)].join(' ').toLowerCase().includes(query);});
  $('#admin-summary').textContent=`${catalog.products.length} товаров · ${catalog.products.filter(p=>p.visible!==false).length} на сайте`;
  $('#admin-list-count').textContent=`Найдено: ${found.length}`;
  $('#admin-list').innerHTML=found.length?found.map(p=>`<button type="button" class="admin-item" data-id="${e(p.id)}" aria-current="${current?.id===p.id}"><img src="${e(p.image)}" alt="" loading="lazy"><span><strong>${e(p.name)}</strong><small>${e(p.model||p.seriesName)}</small><small>${e(priceLabel(p))}</small>${p.visible===false?'<em>Скрыт с сайта</em>':''}</span></button>`).join(''):'<p class="admin-list-empty">Изделий не найдено. Измените запрос или добавьте новый товар.</p>';
@@ -28,6 +29,7 @@ function openProduct(product){
  field('category').innerHTML=catalog.categories.map(c=>`<option value="${e(c.id)}">${e(c.name)}</option>`).join('');field('category').value=product.category;updateSeries(product.series);
  for(const name of ['name','model','tag','description','priceUnit'])field(name).value=product[name]||'';
  field('details').value=(product.details||[]).join('\n');field('price').value=product.price??'';field('priceFrom').checked=product.priceFrom===true;field('visible').checked=product.visible!==false;
+ for(const lang of ['kk','en']){const translated=localizeCatalog({...catalog,products:[product]},lang).products[0];for(const name of ['name','tag','description','details']){const value=product.translations?.[lang]?.[name]??(JSON.stringify(translated[name])!==JSON.stringify(product[name])?translated[name]:'');field(lang+'_'+name).value=Array.isArray(value)?value.join('\n'):value||'';}}
  showPhoto();$('#photo-status').textContent='';status('');renderList();
  if(innerWidth<721)form.scrollIntoView({behavior:'smooth',block:'start'});
 }
@@ -55,6 +57,7 @@ $('#photo-file').addEventListener('change',async event=>{
 form.addEventListener('submit',async event=>{
  event.preventDefault();if(busy)return;if(!current.image){status('Сначала загрузите фотографию товара.',true);$('#photo-file').focus();return;}
  const values=Object.fromEntries(new FormData(form)),product={...current,...values,details:values.details.split(/\r?\n/).map(s=>s.trim()).filter(Boolean),price:values.price===''?null:Number(values.price),priceFrom:field('priceFrom').checked,visible:field('visible').checked};
+ product.translations={};for(const lang of ['kk','en']){const copy={};for(const name of ['name','tag','description']){const value=values[lang+'_'+name]?.trim();if(value)copy[name]=value;}const details=values[lang+'_details'].split(/\r?\n/).map(v=>v.trim()).filter(Boolean);if(details.length)copy.details=details;if(Object.keys(copy).length)product.translations[lang]=copy;for(const name of ['name','tag','description','details'])delete product[lang+'_'+name];}
  locked(true);status('Сохраняем изменения…');
  try{const {product:saved}=await api('/api/admin/product',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({product,revision:current.revision})});const index=catalog.products.findIndex(p=>p.id===saved.id);if(index<0)catalog.products.unshift(saved);else catalog.products[index]=saved;openProduct(saved);status(saved.visible?'Сохранено. Изменения уже доступны на сайте.':'Сохранено. Товар скрыт с сайта.');}
  catch(error){status(error.message,true);}finally{locked(false);}

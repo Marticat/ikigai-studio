@@ -1,3 +1,5 @@
+import {language} from './i18n.mjs';
+import {preferenceStorage,preferencesEnabled} from './privacy-storage.mjs';
 import {loadCatalog,catalogUnavailable} from './catalog-client.mjs';
 import {priceLabel,fitEnquiry} from './order-model.mjs';
 import {kitsSection} from './kits.mjs';
@@ -8,7 +10,7 @@ import {restoreSelection,toggleSelection,createEnquiry,escapeHTML as e} from './
 const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
 const route=resolveCatalog(new URLSearchParams(location.search),products,series,categories);
 const storageKey='ikigai-wardrobe-selection-v1';
-let selection=[],sessionOnly=false;if(!sessionOnly)try{selection=restoreSelection(localStorage.getItem(storageKey),products);}catch{}
+let selection=[],sessionOnly=false;if(!sessionOnly)try{selection=restoreSelection(preferenceStorage.getItem(storageKey),products);}catch{}
 let query=new URLSearchParams(location.search).get('q')||'',limit=12,timer;
 const url=(key,value)=>`catalog.html?${key}=${encodeURIComponent(value)}`;
 const productLink=p=>url('product',p.id);
@@ -19,7 +21,7 @@ const categoryNav=active=>`<nav class="category-nav" aria-label="Категор�
 function renderListing(){
  const cat=route.type==='category'?route.category:null,s=route.type==='series'?route.series:null;
  const active=cat?.id||s?.category||'';
- const title=cat?.name||s?.name||'Каталог <em>решений.</em>';
+ const title=cat?.name||s?.name||({ru:'Каталог <em>решений.</em>',kk:'Шешімдер <em>каталогы.</em>',en:'A catalog of <em>possibilities.</em>'})[language];
  const description=cat?.description|| (s?'Изделия и варианты серии из каталога MEIDU. Рассмотрите детали и сохраните то, что подходит вашему проекту.':'Гардеробные системы, стеклянные фасады и детали хранения. От целого пространства — к каждой линии.');
  let banner=s?`<div class="series-hero"><img src="${e(s.image)}" alt="${e(s.name)}" fetchpriority="high"><div><p class="eyebrow">MEIDU / Серия</p><h1>${e(title)}</h1><p>${e(description)}</p><span>Позиций: ${s.count} · Каталог 2026</span><a class="text-link" href="#items">Рассмотреть изделия ↓</a></div></div>`:`<header class="catalog-heading"><p class="eyebrow">MEIDU / Коллекция 2026</p><h1>${cat?e(title):title}</h1><p>${e(description)}</p></header>`;
  const relevant=series.filter(item=>!active||item.category===active);
@@ -56,7 +58,7 @@ function syncButtons(){
  $$('[data-save]').forEach(button=>{const p=products.find(p=>p.id===button.dataset.save),saved=selection.includes(p.id);button.setAttribute('aria-pressed',String(saved));button.setAttribute('aria-label',`${saved?'Убрать из подборки':'Добавить в подборку'}: ${p.name}`);button.innerHTML=button.classList.contains('save-button')?(saved?'✓':'+'):(saved?'В подборке <span>✓</span>':'В мою подборку <span>+</span>');});
 }
 function announce(message){clearTimeout(timer);$('#toast').textContent=message;$('#toast').classList.add('visible');timer=setTimeout(()=>$('#toast').classList.remove('visible'),2600);}
-function toggle(id){if(!products.some(p=>p.id===id))return;if(!sessionOnly)try{selection=restoreSelection(localStorage.getItem(storageKey),products);}catch{}selection=toggleSelection(selection,id);let persisted=true;try{localStorage.setItem(storageKey,JSON.stringify(selection));}catch{persisted=false;sessionOnly=true;}syncButtons();renderSelection();announce(persisted?(selection.includes(id)?'Изделие добавлено в подборку':'Изделие убрано из подборки'):'Подборка доступна до закрытия вкладки');}
+function toggle(id){if(!products.some(p=>p.id===id))return;if(!sessionOnly)try{selection=restoreSelection(preferenceStorage.getItem(storageKey),products);}catch{}selection=toggleSelection(selection,id);let persisted=true;try{preferenceStorage.setItem(storageKey,JSON.stringify(selection));}catch{persisted=false;sessionOnly=true;}syncButtons();renderSelection();announce(persisted?(selection.includes(id)?'Изделие добавлено в подборку':'Изделие убрано из подборки'):'Подборка доступна до закрытия вкладки');}
 function renderSelection(){const found=products.filter(p=>selection.includes(p.id));$('#selected-products').innerHTML=found.length?found.map(p=>`<article class="selected-product"><a href="${productLink(p)}"><img src="${e(p.image)}" alt="${e(p.name)}" width="75" height="85"></a><div><h3><a href="${productLink(p)}">${e(p.name)}</a></h3><p>${e(p.model||p.seriesName)}${p.page?' · стр. '+p.page:''}</p></div><button class="remove-product" data-remove="${e(p.id)}" aria-label="Удалить: ${e(p.name)}">×</button></article>`).join(''):'<div class="selection-empty">Здесь появятся понравившиеся изделия.<a class="text-link" href="catalog.html">Посмотреть каталог ↗</a></div>';}
 function openDialog(id){const dlg=$(id);if(!dlg.open)dlg.showModal();document.body.classList.add('modal-open');}
 $$('dialog').forEach(dlg=>{
@@ -77,11 +79,11 @@ function closeMenu(){menu.setAttribute('aria-expanded','false');menu.setAttribut
 menu.addEventListener('click',()=>{const open=menu.getAttribute('aria-expanded')!=='true';menu.setAttribute('aria-expanded',String(open));menu.setAttribute('aria-label',open?'Закрыть меню':'Открыть меню');nav.classList.toggle('open',open);});
 document.addEventListener('keydown',event=>{if(event.key==='Escape'&&nav.classList.contains('open')){closeMenu();menu.focus();}});
 addEventListener('resize',()=>{if(innerWidth>960)closeMenu();},{passive:true});
-addEventListener('storage',event=>{if(event.key===storageKey){selection=restoreSelection(event.newValue,products);syncButtons();renderSelection();}});
+addEventListener('storage',event=>{if(preferencesEnabled()&&event.key===storageKey){selection=restoreSelection(event.newValue,products);syncButtons();renderSelection();}});
 if(route.type==='missing')$('#catalog-view').innerHTML=crumbs()+`<section class="catalog-heading"><p class="eyebrow">Каталог обновляется</p><h1>Изделие <em>не найдено.</em></h1><p>Возможно, ссылка устарела. Выберите изделие в актуальном каталоге.</p><a href="catalog.html" class="light-button">Открыть каталог ↗</a></section>`;
 else if(route.type==='product')renderProduct(route.product);else renderListing();
 if(route.type==='category')document.title=route.category.name+' — IKIGAI';
 if(route.type==='series')document.title=route.series.name+' — IKIGAI';
 syncButtons();renderSelection();
 
-addEventListener('pageshow',()=>{if(!sessionOnly)try{selection=restoreSelection(localStorage.getItem(storageKey),products);}catch{}syncButtons();renderSelection();});
+addEventListener('pageshow',()=>{if(!sessionOnly)try{selection=restoreSelection(preferenceStorage.getItem(storageKey),products);}catch{}syncButtons();renderSelection();});

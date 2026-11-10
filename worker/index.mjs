@@ -17,7 +17,7 @@ export default {async fetch(request,env){
    if(path==='/api/admin/catalog'&&request.method==='GET')return json({...mergeCatalog(await rows(env),true),email:request.headers.get('oai-authenticated-user-email')});
    if(path==='/api/admin/product'&&request.method==='PUT'){
     if(!request.headers.get('content-type')?.startsWith('application/json'))return json({error:'Нужен JSON.'},415);
-    let body;try{body=JSON.parse(new TextDecoder().decode(await readLimited(request,24000)));}catch(error){if(error.status)throw error;return json({error:'Не удалось прочитать карточку.'},400);}
+    let body;try{body=JSON.parse(new TextDecoder().decode(await readLimited(request,96000)));}catch(error){if(error.status)throw error;return json({error:'Не удалось прочитать карточку.'},400);}
     const p=validateProduct(body.product),revision=body.revision;
     if(!Number.isInteger(revision)||revision<0)return json({error:'Обновите карточку перед сохранением.'},400);
     const timestamp=new Date().toISOString();

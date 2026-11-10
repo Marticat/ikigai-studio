@@ -1,3 +1,4 @@
+import {language,t,localeCode} from './i18n.mjs';
 export const defaultConfig=Object.freeze({width:300,height:260,preset:'mixed',profile:'graphite',glass:'smoked',light:'warm'});
 export const profiles={graphite:{name:'Графит',color:'#373b38',edge:'#777d72'},bronze:{name:'Бронза',color:'#9a7752',edge:'#d3b58a'},silver:{name:'Серебро',color:'#a7ada7',edge:'#e2e5df'}};
 export const glasses={open:{name:'Без стекла',color:'none',opacity:0},clear:{name:'Прозрачное',color:'#dce8e2',opacity:.09},smoked:{name:'Дымчатое',color:'#34453e',opacity:.3},bronze:{name:'Бронзовое',color:'#a87942',opacity:.26}};
@@ -21,5 +22,9 @@ export function estimateConfig(input){
  const total=lines.reduce((sum,l)=>sum+l.amount,0);
  return {lines,total,low:Math.floor(total*(1-demoRates.range)/10000)*10000,high:Math.ceil(total*(1+demoRates.range)/10000)*10000};
 }
-export const formatMoney=n=>new Intl.NumberFormat('ru-RU').format(n)+' ₸';
-export function configEnquiry(input){const c=normalizeConfig(input),p=presets[c.preset],estimate=estimateConfig(c);return 'https://wa.me/77019996799?text='+encodeURIComponent(['Здравствуйте! Собрал эскиз гардеробной на сайте IKIGAI.','Размеры (Ш × В × Г): '+c.width+' × '+c.height+' × 60 см.',`Наполнение: ${p.name}.`,`Профиль: ${profiles[c.profile].name}.`,`Стекло: ${glasses[c.glass].name}.`,`Подсветка: ${lights[c.light].name}.`,`На сайте показан демонстрационный ориентир ${formatMoney(estimate.low)} – ${formatMoney(estimate.high)}; он не подтверждён IKIGAI. Доставка и монтаж не включены.`,'Прошу уточнить возможность изготовления, комплектацию и реальную стоимость.'].join('\n'));}
+export const formatMoney=n=>new Intl.NumberFormat(localeCode()).format(n)+' ₸';
+export function configEnquiry(input){
+ const c=normalizeConfig(input),p=presets[c.preset],estimate=estimateConfig(c),range=formatMoney(estimate.low)+' – '+formatMoney(estimate.high);
+ const words={ru:['Здравствуйте! Собрал эскиз гардеробной на сайте IKIGAI.','Размеры (Ш × В × Г)','Наполнение','Профиль','Стекло','Подсветка','На сайте показан демонстрационный ориентир '+range+'; он не подтверждён IKIGAI. Доставка и монтаж не включены.','Прошу уточнить возможность изготовления, комплектацию и реальную стоимость.'],kk:['Сәлеметсіз бе! IKIGAI сайтында гардероб нобайын құрастырдым.','Өлшемдер (Е × Б × Т)','Ішкі жабдық','Профиль','Әйнек','Жарықтандыру','Сайттағы '+range+' — демонстрациялық есеп, оны IKIGAI растаған жоқ. Жеткізу мен орнату кірмейді.','Жасау мүмкіндігін, жиынтықты және нақты бағасын нақтылаңызшы.'],en:['Hello! I created a wardrobe design on the IKIGAI website.','Dimensions (W × H × D)','Interior layout','Profile','Glass','Lighting','The website shows a demo estimate of '+range+'; this has not been confirmed by IKIGAI. Delivery and installation are excluded.','Please confirm feasibility, specifications and the actual price.']}[language];
+ return 'https://wa.me/77019996799?text='+encodeURIComponent([words[0],words[1]+': '+c.width+' × '+c.height+' × 60 '+(language==='en'?'cm.':'см.'),words[2]+': '+t(p.name)+'.',words[3]+': '+t(profiles[c.profile].name)+'.',words[4]+': '+t(glasses[c.glass].name)+'.',words[5]+': '+t(lights[c.light].name)+'.',words[6],words[7]].join('\n'));
+}

@@ -7,5 +7,5 @@ export function resolveCatalog(params,products,series,categories){
 const normalize=value=>String(value||'').toLocaleLowerCase('ru').replace(/[\s‐‑–—-]+/g,'');
 export function queryCatalog(products,{category='all',series='',query=''}={}){
  const needle=normalize(query);
- return products.filter(p=>(category==='all'||p.category===category)&&(!series||p.series===series)&&normalize([p.name,p.model,p.seriesName,p.tag,p.description,...(p.details||[])].join(' ')).includes(needle));
+ return products.filter(p=>(category==='all'||p.category===category)&&(!series||p.series===series)&&normalize([p.searchTerms,p.name,p.model,p.seriesName,p.tag,p.description,...(p.details||[])].join(' ')).includes(needle));
 }

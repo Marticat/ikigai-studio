@@ -1,3 +1,4 @@
+import {preferenceStorage,preferencesEnabled} from './privacy-storage.mjs';
 import {loadCatalog,catalogUnavailable} from './catalog-client.mjs';
 import {priceLabel,fitEnquiry} from './order-model.mjs';
 import {kitsSection} from './kits.mjs';
@@ -9,19 +10,19 @@ const $$=(s,root=document)=>[...root.querySelectorAll(s)];
 const displayProduct=p=>Object.fromEntries(Object.entries(p).map(([key,value])=>[key,Array.isArray(value)?value.map(escapeHTML):escapeHTML(value)]));
 const storageKey='ikigai-wardrobe-selection-v1';
 let selection=[],sessionOnly=false;
-if(!sessionOnly)try{selection=restoreSelection(localStorage.getItem(storageKey),products);}catch{}
+if(!sessionOnly)try{selection=restoreSelection(preferenceStorage.getItem(storageKey),products);}catch{}
 let filter='all',query='',insideId='accessories',materialIndex=0,openProductId=null;
 let toastTimer;
 const reduced=window.matchMedia('(prefers-reduced-motion: reduce)');
 const grid=$('#catalog-grid');
 function announce(text){clearTimeout(toastTimer);$('#toast').textContent=text;$('#toast').classList.add('visible');toastTimer=setTimeout(()=>$('#toast').classList.remove('visible'),2600);}
 function syncCounts(){$$('[data-count]').forEach(el=>{el.textContent=selection.length;});}
-function saveSelection(){let persisted=true;try{localStorage.setItem(storageKey,JSON.stringify(selection));}catch{persisted=false;sessionOnly=true;}syncCounts();return persisted;}
+function saveSelection(){let persisted=true;try{preferenceStorage.setItem(storageKey,JSON.stringify(selection));}catch{persisted=false;sessionOnly=true;}syncCounts();return persisted;}
 function syncSaveButtons(){
  $$('[data-save]').forEach(button=>{const saved=selection.includes(button.dataset.save),p=products.find(p=>p.id===button.dataset.save);button.setAttribute('aria-pressed',String(saved));if(button.classList.contains('save-button')){button.textContent=saved?'✓':'+';button.setAttribute('aria-label',`${saved?'Убрать из подборки':'Добавить в подборку'}: ${p.name}`);}else{button.innerHTML=saved?'В подборке <span>✓</span>':'В мою подборку <span>+</span>';}});
  const state=featuredState(products,selection,palettes[materialIndex].product);$('#material-save').disabled=!state.available;if(!state.available){$('#material-save').textContent='Решение обновляется';return;}$('#material-save').innerHTML=state.selected?'Решение в подборке <span>✓</span>':'Добавить решение в подборку <span>+</span>';
 }
-function toggleProduct(id){if(!products.some(p=>p.id===id))return;if(!sessionOnly)try{selection=restoreSelection(localStorage.getItem(storageKey),products);}catch{}selection=toggleSelection(selection,id);const persisted=saveSelection();syncSaveButtons();renderSelection();announce(!persisted?'Подборка доступна до закрытия этой вкладки.':selection.includes(id)?'Решение добавлено в вашу подборку':'Решение убрано из подборки');}
+function toggleProduct(id){if(!products.some(p=>p.id===id))return;if(!sessionOnly)try{selection=restoreSelection(preferenceStorage.getItem(storageKey),products);}catch{}selection=toggleSelection(selection,id);const persisted=saveSelection();syncSaveButtons();renderSelection();announce(!persisted?'Подборка доступна до закрытия этой вкладки.':selection.includes(id)?'Решение добавлено в вашу подборку':'Решение убрано из подборки');}
 function renderCatalog(){
  const preferred=['glass-dark','meidu-062','accessories','shelves','meidu-044','meidu-067'];
  const ordered=[...preferred.map(id=>products.find(p=>p.id===id)).filter(Boolean),...products.filter(p=>!preferred.includes(p.id))];
@@ -91,8 +92,8 @@ function onScroll(){
  if(pending)return;pending=true;requestAnimationFrame(()=>{const max=document.documentElement.scrollHeight-innerHeight;$('.progress i').style.transform=`scaleX(${max>0?scrollY/max:0})`;let active=sections[0];for(const s of sections)if(s.getBoundingClientRect().top<innerHeight*.4)active=s;$$('#main-nav a').forEach(a=>{const current=a.getAttribute('href')==='#'+active.id;a.classList.toggle('active',current);if(current)a.setAttribute('aria-current','location');else a.removeAttribute('aria-current');});pending=false;});
 }
 addEventListener('scroll',onScroll,{passive:true});
-addEventListener('storage',event=>{if(event.key===storageKey){selection=restoreSelection(event.newValue,products);syncCounts();syncSaveButtons();renderSelection();}});
-addEventListener('pageshow',()=>{if(!sessionOnly)try{selection=restoreSelection(localStorage.getItem(storageKey),products);}catch{}syncCounts();syncSaveButtons();renderSelection();});
+addEventListener('storage',event=>{if(preferencesEnabled()&&event.key===storageKey){selection=restoreSelection(event.newValue,products);syncCounts();syncSaveButtons();renderSelection();}});
+addEventListener('pageshow',()=>{if(!sessionOnly)try{selection=restoreSelection(preferenceStorage.getItem(storageKey),products);}catch{}syncCounts();syncSaveButtons();renderSelection();});
 $$('[data-inside]').forEach(b=>{b.disabled=!products.some(p=>p.id===b.dataset.inside);});
 $('#inside-details').disabled=!products.some(p=>p.id===insideId);
 if($('#inside-details').disabled)$$('[data-inside]').find(button=>!button.disabled)?.click();
