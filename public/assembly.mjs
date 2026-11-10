@@ -12,6 +12,8 @@ let frame=0,inView=false,last=-1;
 for(const stroke of strokes){stroke.style.strokeDasharray='1';stroke.setAttribute('pathLength','1');}
 function render(p){
  if(Math.abs(last-p)<.0002)return;last=p;section.dataset.progress=p.toFixed(3);
+ stage.style.setProperty('--assembly-brand-left',String(phase(p,.08,.58)));
+ stage.style.setProperty('--assembly-brand-right',String(phase(p,.18,.68)));
  strokes.forEach((stroke,i)=>{const amount=phase(p,.015+i*.012,.31+i*.012);stroke.style.strokeDashoffset=String(1-amount);stroke.style.opacity=String(.12+.88*amount);});
  parts.forEach((part,i)=>{const amount=phase(p,.22+i*.012,.49+i*.012);part.style.opacity=String(amount);part.setAttribute('transform',`translate(0 ${(1-amount)*(part.dataset.assemblyPart==='drawer'?28:-25)})`);});
  const glass=phase(p,.62,.79),opening=phase(p,.84,.99);
