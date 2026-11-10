@@ -6,6 +6,16 @@ const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const key='ikigai-configurator-v1';
 let config={...defaultConfig},doorsOpen=false,view='realistic',sceneRequest=0;
 const photoCache=new Map();
+let sceneSignature='',sceneAnimation;
+const motionPreference=matchMedia('(prefers-reduced-motion: reduce)');
+motionPreference.addEventListener('change',()=>{if(motionPreference.matches)sceneAnimation?.cancel();});
+function animateScene(){
+ const signature=[view,config.preset,config.profile,config.glass,config.light,doorsOpen].join('/');
+ if(signature===sceneSignature)return;sceneSignature=signature;
+ sceneAnimation?.cancel();
+ if(!motionPreference.matches)sceneAnimation=$('#wardrobe-scene').animate([{opacity:.65,transform:'translateY(7px)'},{opacity:1,transform:'translateY(0)'}],{duration:460,easing:'cubic-bezier(.2,.7,.2,1)'});
+}
+
 function loadPhoto(src){
  if(!photoCache.has(src))photoCache.set(src,new Promise((resolve,reject)=>{const img=new Image();img.onload=()=>resolve(img);img.onerror=()=>{photoCache.delete(src);reject(new Error('photo unavailable'));};img.src=src;}));
  return photoCache.get(src);
@@ -13,17 +23,17 @@ function loadPhoto(src){
 function syncView(){
  $$('[data-scene-view]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.sceneView===view)));
  $('#scene-label').textContent=view==='realistic'?'ВАША ГАРДЕРОБНАЯ':'СХЕМА С РАЗМЕРАМИ';
- $('#scene-note').textContent=view==='realistic'?'Концепт визуализации, не фото готового изделия.':'Условная схема. Конструкцию согласуем отдельно.';
+ $('#scene-note').textContent=view==='realistic'?'Концепт визуализации, не фото готового изделия.':'Схема без одежды и аксессуаров. Конструкцию согласуем отдельно.';
 }
 async function renderScene(){
  const token=++sceneRequest,snapshot={...config},previewOpen=doorsOpen;
  syncView();
- if(view==='schematic'){$('#wardrobe-scene').innerHTML=wardrobeScene(snapshot,{doorsOpen:previewOpen});$('#wardrobe-scene').setAttribute('aria-busy','false');$('#photo-status').textContent='';return;}
+ if(view==='schematic'){$('#wardrobe-scene').innerHTML=wardrobeScene(snapshot,{doorsOpen:previewOpen});$('#wardrobe-scene').setAttribute('aria-busy','false');$('#photo-status').textContent='';animateScene();return;}
  $('#wardrobe-scene').setAttribute('aria-busy','true');$('#photo-status').textContent='Загружаем материалы…';
  try{
   await loadPhoto(photoAssets[snapshot.preset]);
   if(token!==sceneRequest)return;
-  $('#wardrobe-scene').innerHTML=realisticScene(snapshot,{doorsOpen:previewOpen});$('#wardrobe-scene').setAttribute('aria-busy','false');$('#photo-status').textContent='';
+  $('#wardrobe-scene').innerHTML=realisticScene(snapshot,{doorsOpen:previewOpen});$('#wardrobe-scene').setAttribute('aria-busy','false');$('#photo-status').textContent='';animateScene();
  }catch{
   if(token!==sceneRequest)return;
   view='schematic';syncView();$('#wardrobe-scene').innerHTML=wardrobeScene(snapshot,{doorsOpen:previewOpen});$('#wardrobe-scene').setAttribute('aria-busy','false');$('#photo-status').textContent='Фото не загрузилось — доступна схема.';

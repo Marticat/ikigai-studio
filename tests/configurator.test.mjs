@@ -3,6 +3,17 @@ import assert from 'node:assert/strict';
 import {normalizeConfig,estimateConfig,configEnquiry,presets,defaultConfig} from '../public/configurator-model.mjs';
 import {wardrobeScene} from '../public/configurator-scene.mjs';
 
+test('empty schematic keeps the shelves, rails, drawers and dimensions in every preset',()=>{
+ for(const [preset,layout] of Object.entries(presets)){
+  const svg=wardrobeScene({...defaultConfig,preset,glass:'open',width:320,height:270});
+  assert.doesNotMatch(svg,/clothShadow|data-decoration|data-garment/);
+  assert.equal((svg.match(/data-rail="true"/g)||[]).length,layout.rails);
+  assert.equal((svg.match(/data-shelf="true"/g)||[]).length,layout.shelves);
+  assert.equal((svg.match(/data-drawer="true"/g)||[]).length,layout.drawers);
+  assert.match(svg,/320 см/);assert.match(svg,/270 см/);
+ }
+});
+
 test('corrupt persisted values cannot escape allowed configuration',()=>{
  assert.deepEqual(normalizeConfig(null),defaultConfig);
  assert.deepEqual(normalizeConfig([]),defaultConfig);

@@ -85,11 +85,6 @@ $$('#main-nav a').forEach(a=>a.addEventListener('click',closeMenu));
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&nav.classList.contains('open')){closeMenu();menu.focus();}});
 window.addEventListener('resize',()=>{if(window.innerWidth>960)closeMenu();},{passive:true});
 
-if('IntersectionObserver' in window){
- document.documentElement.classList.add('motion-ready');
- const revealObserver=new IntersectionObserver(entries=>entries.forEach(entry=>{if(entry.isIntersecting){entry.target.classList.add('is-visible');revealObserver.unobserve(entry.target);}}),{threshold:.08});
- $$('.reveal').forEach(el=>revealObserver.observe(el));
-}
 let pending=false;
 const sections=$$('#home,#collection,#inside,#materials,#process,#contact');
 function onScroll(){
