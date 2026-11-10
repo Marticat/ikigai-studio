@@ -8,3 +8,5 @@ h1,h2,h3,.card-title a{overflow-wrap:anywhere}.inside-options button>span{min-wi
 @media(min-width:601px){.intro-bottom{grid-template-columns:1fr auto}}
 
 .hero-pagination .hero-autoplay{border-left:1px solid #ffffff35;margin-left:4px;opacity:.8}.hero-pagination .hero-autoplay:hover{opacity:1}.hero-pagination button:focus-visible{outline:1px solid currentColor;outline-offset:2px}
+
+.intro{grid-template-columns:1fr}.hero-copy .light-button{margin-top:28px}@media(max-width:600px){.hero-copy .light-button{margin-top:24px}}

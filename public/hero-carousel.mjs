@@ -3,8 +3,6 @@ import {t} from './i18n.mjs';
 const stage=document.querySelector('.hero-stage');
 const images=[...stage.querySelectorAll('.hero-img')];
 const buttons=[...stage.querySelectorAll('[data-slide]')];
-const caption=document.querySelector('#slide-caption');
-const captions=['Стекло и тонкие линии','Тёплая палитра','Открытая архитектура'];
 const motion=matchMedia('(prefers-reduced-motion: reduce)');
 const delay=6000;
 let index=Math.max(0,images.findIndex(image=>image.classList.contains('active')));
@@ -21,7 +19,6 @@ function show(next){
  index=next;
  images.forEach((image,i)=>{image.classList.toggle('active',i===index);image.setAttribute('aria-hidden',String(i!==index));});
  buttons.forEach((button,i)=>{button.classList.toggle('active',i===index);button.setAttribute('aria-pressed',String(i===index));});
- caption.textContent=t(captions[index]);
 }
 function syncToggle(){
  const label=t(paused?'Включить смену фотографий':'Приостановить смену фотографий');
