@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { filterProducts, restoreSelection, toggleSelection, createEnquiry, escapeHTML, featuredState } from '../dist/store.mjs';
+import { filterProducts, restoreSelection, toggleSelection, createEnquiry, escapeHTML, featuredState } from '../public/store.mjs';
 const products = [{id:'a',category:'systems',name:'Стекло и профиль'},{id:'b',category:'filling',name:'Ящик для аксессуаров'}];
 test('filter and search work together and ignore whitespace/case',()=>{
   assert.deepEqual(filterProducts(products,'systems',' стекло ').map(p=>p.id),['a']);

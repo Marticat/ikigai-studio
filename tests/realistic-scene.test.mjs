@@ -1,12 +1,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {existsSync} from 'node:fs';
-import {realisticScene,photoAssets} from '../dist/configurator-realistic.mjs';
-import {defaultConfig,estimateConfig} from '../dist/configurator-model.mjs';
+import {realisticScene,photoAssets} from '../public/configurator-realistic.mjs';
+import {defaultConfig,estimateConfig} from '../public/configurator-model.mjs';
 test('every storage preset uses its own local photorealistic plate',()=>{
  assert.equal(new Set(Object.values(photoAssets)).size,3);
  for(const [preset,path] of Object.entries(photoAssets)){
-  assert.ok(existsSync(new URL('../dist/'+path,import.meta.url)));
+  assert.ok(existsSync(new URL('../public/'+path,import.meta.url)));
   assert.ok(realisticScene({...defaultConfig,preset}).includes(path));
  }
 });

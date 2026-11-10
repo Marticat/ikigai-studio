@@ -1,9 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {existsSync,statSync} from 'node:fs';
-import {products,series,categories} from '../dist/catalog.mjs';
-import {resolveCatalog,queryCatalog} from '../dist/catalog-logic.mjs';
-import {createEnquiry} from '../dist/store.mjs';
+import {products,series,categories} from '../public/catalog.mjs';
+import {resolveCatalog,queryCatalog} from '../public/catalog-logic.mjs';
+import {createEnquiry} from '../public/store.mjs';
 
 test('every supplier product page has a unique record and working assets',()=>{
  assert.equal(products.length,79);
@@ -11,10 +11,10 @@ test('every supplier product page has a unique record and working assets',()=>{
  assert.deepEqual(products.map(p=>p.page).sort((a,b)=>a-b),Array.from({length:79},(_,i)=>i+4));
  for(const p of products){
   assert.ok(categories.some(c=>c.id===p.category));assert.ok(series.some(s=>s.id===p.series));
-  assert.ok(existsSync(new URL('../dist/'+p.image,import.meta.url)));
-  assert.ok(existsSync(new URL('../dist/'+p.sheet,import.meta.url)));
+  assert.ok(existsSync(new URL('../public/'+p.image,import.meta.url)));
+  assert.ok(existsSync(new URL('../public/'+p.sheet,import.meta.url)));
  }
- assert.ok(statSync(new URL('../dist/downloads/meidu-2026.pdf',import.meta.url)).size<25*1024*1024);
+ assert.ok(statSync(new URL('../public/downloads/meidu-2026.pdf',import.meta.url)).size<25*1024*1024);
 });
 test('routes reject unknown records and preserve category/series context',()=>{
  const p=products[0];

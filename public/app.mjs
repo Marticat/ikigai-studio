@@ -1,4 +1,7 @@
-import {products,categoryLabels} from './catalog.mjs';
+import {loadCatalog,catalogUnavailable} from './catalog-client.mjs';
+import {priceLabel,fitEnquiry} from './order-model.mjs';
+import {kitsSection} from './kits.mjs';
+const {products,series,categories,categoryLabels}=await loadCatalog().catch(error=>{catalogUnavailable();throw error;});
 import {filterProducts,restoreSelection,toggleSelection,createEnquiry,escapeHTML,featuredState} from './store.mjs';
 
 const $=(s,root=document)=>root.querySelector(s);
@@ -23,7 +26,7 @@ function renderCatalog(){
  const preferred=['glass-dark','meidu-062','accessories','shelves','meidu-044','meidu-067'];
  const ordered=[...preferred.map(id=>products.find(p=>p.id===id)).filter(Boolean),...products.filter(p=>!preferred.includes(p.id))];
  const matching=filterProducts(ordered,filter,query),found=matching.slice(0,6);
- grid.innerHTML=found.map(raw=>{const p=displayProduct(raw);return `<article class="product-card"><div class="card-media"><a class="card-open" href="catalog.html?product=${p.id}" aria-label="Рассмотреть: ${p.name}"><img src="${p.image}" alt="${p.name}" loading="lazy" width="800" height="1000"><span class="card-index">${String(products.findIndex(item=>item.id===raw.id)+1).padStart(2,'0')}</span><span class="card-explore" aria-hidden="true">↗</span></a><button class="save-button" data-save="${p.id}" aria-pressed="${selection.includes(p.id)}" aria-label="Добавить в подборку: ${p.name}">+</button></div><div class="card-label"><span>${p.tag}</span></div><h3 class="card-title"><a href="catalog.html?product=${p.id}">${p.name}</a></h3><p class="card-price">По индивидуальному расчёту</p></article>`;}).join('');
+ grid.innerHTML=found.map(raw=>{const p=displayProduct(raw);return `<article class="product-card"><div class="card-media"><a class="card-open" href="catalog.html?product=${p.id}" aria-label="Рассмотреть: ${p.name}"><img src="${p.image}" alt="${p.name}" loading="lazy" width="800" height="1000"><span class="card-index">${String(products.findIndex(item=>item.id===raw.id)+1).padStart(2,'0')}</span><span class="card-explore" aria-hidden="true">↗</span></a><button class="save-button" data-save="${p.id}" aria-pressed="${selection.includes(p.id)}" aria-label="Добавить в подборку: ${p.name}">+</button></div><div class="card-label"><span>${p.tag}</span></div><h3 class="card-title"><a href="catalog.html?product=${p.id}">${p.name}</a></h3><p class="card-price">${escapeHTML(priceLabel(raw))}</p></article>`;}).join('');
  $('#empty-search').hidden=found.length>0;
  $('#catalog-count').textContent=`Показано ${found.length} из ${matching.length} решений`;
  syncSaveButtons();
@@ -66,7 +69,7 @@ function changeImage(el,src,alt){
  const ready=()=>{if(imageJobs.get(el)!==token)return;el.style.opacity='0';setTimeout(()=>{if(imageJobs.get(el)!==token)return;el.src=src;el.alt=alt;el.style.opacity='1';},reduced.matches?0:180);};
  if(loader.complete)ready();else{loader.onload=ready;loader.onerror=()=>{el.style.opacity='1';};}
 }
-$$('[data-inside]').forEach(button=>button.addEventListener('click',()=>{insideId=button.dataset.inside;const p=products.find(p=>p.id===insideId);if(!p)return;changeImage($('#inside-photo'),p.image,p.name);$('#inside-photo-note').textContent=p.source;$$('[data-inside]').forEach(b=>{b.classList.toggle('selected',b===button);b.setAttribute('aria-pressed',String(b===button));});}));
+$$('[data-inside]').forEach(button=>button.addEventListener('click',()=>{insideId=button.dataset.inside;const p=products.find(p=>p.id===insideId);$('#inside-details').disabled=!p;if(!p)return;changeImage($('#inside-photo'),p.image,p.name);$('#inside-photo-note').textContent=p.source;$$('[data-inside]').forEach(b=>{b.classList.toggle('selected',b===button);b.setAttribute('aria-pressed',String(b===button));});}));
 $('#inside-details').addEventListener('click',()=>openProduct(insideId));
 const palettes=[{title:'Графит<br><em>и стекло.</em>',description:'Чёткая линия профиля, глубина тёмных оттенков и прозрачность стекла. Выразительно, но спокойно.',product:'glass-dark'},{title:'Тёплая<br><em>бронза.</em>',description:'Тёплые оттенки профиля, мягкий свет и стеклянные фасады. Гардеробная, которая продолжает палитру вашего дома.',product:'glass-bronze'},{title:'Мягкий<br><em>свет.</em>',description:'Светлая палитра и деликатная фактура стекла. Воздушное решение с ощущением спокойствия и простора.',product:'glass-soft'}];
 $$('[data-material]').forEach(button=>button.addEventListener('click',()=>{materialIndex=Number(button.dataset.material);const palette=palettes[materialIndex],p=products.find(p=>p.id===palette.product);$('#material-title').innerHTML=palette.title;$('#material-description').textContent=palette.description;$('#material-index').textContent=`0${materialIndex+1} — 03`;if(p)changeImage($('#material-photo'),p.image,p.name);$$('[data-material]').forEach(b=>{b.classList.toggle('selected',b===button);b.setAttribute('aria-pressed',String(b===button));});syncSaveButtons();}));
@@ -97,5 +100,6 @@ addEventListener('storage',event=>{if(event.key===storageKey){selection=restoreS
 addEventListener('pageshow',()=>{if(!sessionOnly)try{selection=restoreSelection(localStorage.getItem(storageKey),products);}catch{}syncCounts();syncSaveButtons();renderSelection();});
 $$('[data-inside]').forEach(b=>{b.disabled=!products.some(p=>p.id===b.dataset.inside);});
 $('#inside-details').disabled=!products.some(p=>p.id===insideId);
+if($('#inside-details').disabled)$$('[data-inside]').find(button=>!button.disabled)?.click();
 $('[data-filter="all"] sup').textContent=String(products.length).padStart(2,'0');
 syncCounts();renderCatalog();renderSelection();onScroll();

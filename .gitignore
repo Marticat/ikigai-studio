@@ -4,3 +4,8 @@ node_modules/
 !.env.example
 .openai/*.local.*
 *.log
+
+dist/
+.wrangler/
+.dev.vars*
+!.dev.vars.example

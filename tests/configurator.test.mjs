@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {normalizeConfig,estimateConfig,configEnquiry,presets,defaultConfig} from '../dist/configurator-model.mjs';
-import {wardrobeScene} from '../dist/configurator-scene.mjs';
+import {normalizeConfig,estimateConfig,configEnquiry,presets,defaultConfig} from '../public/configurator-model.mjs';
+import {wardrobeScene} from '../public/configurator-scene.mjs';
 
 test('corrupt persisted values cannot escape allowed configuration',()=>{
  assert.deepEqual(normalizeConfig(null),defaultConfig);
