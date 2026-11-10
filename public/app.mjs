@@ -63,9 +63,6 @@ $$('[data-filter]').forEach(button=>button.addEventListener('click',()=>{filter=
 $('#catalog-search').addEventListener('input',e=>{query=e.target.value;renderCatalog();});
 $('#reset-search').addEventListener('click',()=>{query='';filter='all';$('#catalog-search').value='';$$('[data-filter]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.filter==='all')));renderCatalog();$('#catalog-search').focus();});
 
-const captions=['Стекло и тонкие линии','Тёплая палитра','Открытая архитектура'];
-$$('[data-slide]').forEach(button=>button.addEventListener('click',()=>{const i=Number(button.dataset.slide);$$('.hero-img').forEach((img,j)=>img.classList.toggle('active',j===i));$$('[data-slide]').forEach((b,j)=>{b.classList.toggle('active',j===i);b.setAttribute('aria-pressed',String(j===i));});$('#slide-caption').textContent=captions[i];}));
-
 let imageJobs=new WeakMap();
 function changeImage(el,src,alt){
  const token={};imageJobs.set(el,token);const loader=new Image();loader.src=src;
