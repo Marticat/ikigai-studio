@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="ru">
+<head>
+ <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+ <title>IKIGAI — Гардеробные. Пространство для вашего ритма.</title>
+ <meta name="description" content="Гардеробные системы, стеклянные фасады и внутреннее наполнение шкафов. IKIGAI, Астана. Выберите решение для своего пространства.">
+ <meta name="theme-color" content="#41423f"><meta property="og:title" content="IKIGAI — У каждой вещи своё место"><meta property="og:description" content="Гардеробные системы и внутреннее наполнение. Коллекции, детали, ваш проект."><meta property="og:type" content="website">
+ <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+ <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+ <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=Manrope:wght@400;500;600&display=swap" rel="stylesheet">
+ <link rel="preload" as="image" href="assets/glass-dark.webp"><link rel="stylesheet" href="styles.css">
+ <script type="module" src="app.mjs"></script>
+</head>
+<body>
+<a class="skip" href="#main">Перейти к содержимому</a>
+<div class="progress" aria-hidden="true"><i></i></div>
+<header class="rail">
+ <a class="logo" href="#home" aria-label="IKIGAI, главная">IKIGAI<span>WARDROBE STUDIO</span></a>
+ <button class="mobile-menu" aria-label="Открыть меню" aria-expanded="false" aria-controls="main-nav"><i></i><i></i></button>
+ <nav id="main-nav" aria-label="Основная навигация">
+  <a href="#home" class="active"><span>01</span>Главная</a>
+  <a href="#collection"><span>02</span>Коллекция</a>
+  <a href="#inside"><span>03</span>Наполнение</a>
+  <a href="#materials"><span>04</span>Материалы</a>
+  <a href="#process"><span>05</span>Ваш проект</a>
+  <a href="#contact"><span>06</span>Контакты</a>
+ </nav>
+ <button class="collection-open" data-open-collection>Моя подборка <span data-count>0</span><span aria-hidden="true">↗</span></button>
+ <div class="rail-bottom"><span class="status-dot"></span> Астана, Казахстан<br><a href="tel:+77019996799">+7 701 999 67 99</a><span class="rail-note">Пространство для вашего ритма.</span></div>
+</header>
+<main id="main">
+ <section class="hero" id="home" aria-label="Гардеробные IKIGAI">
+  <div class="topline"><span>ГАРДЕРОБНЫЕ СИСТЕМЫ И НАПОЛНЕНИЕ</span><a href="#contact">Обсудить проект <span>↗</span></a></div>
+  <div class="hero-stage">
+   <div class="hero-images"><img class="hero-img active" src="assets/glass-dark.webp" alt="Гардеробная со стеклянными фасадами и тёмным профилем MEIDU" fetchpriority="high" width="1400" height="1500"><img class="hero-img" src="assets/glass-bronze.webp" alt="Гардеробная со стеклом в тёплых тонах" width="1400" height="1500"><img class="hero-img" src="assets/open-system.webp" alt="Открытая гардеробная система на стойках" width="1400" height="1500"></div>
+   <div class="hero-shade"></div><span class="hero-edition">IKIGAI / ЛИЧНОЕ ПРОСТРАНСТВО</span>
+   <div class="hero-copy"><p class="eyebrow">Продуманно. До последней детали.</p><h1>У каждой вещи<br><em>своё место.</em></h1><p class="hero-description">Гардеробные, в которых порядок<br>становится частью красивой жизни.</p><a class="light-button" href="#collection">Найти своё решение <span>↗</span></a></div>
+   <div class="hero-pagination" aria-label="Фотографии гардеробных"><button class="active" data-slide="0" aria-label="Фото 1: стеклянная гардеробная" aria-pressed="true">01</button><button data-slide="1" aria-label="Фото 2: тёплая палитра" aria-pressed="false">02</button><button data-slide="2" aria-label="Фото 3: открытая система" aria-pressed="false">03</button></div>
+   <span class="hero-side">МЕТАЛЛ · СТЕКЛО · СВЕТ</span>
+  </div>
+  <div class="hero-caption"><span id="slide-caption">01 / Стекло и тонкие линии</span><a href="#intro">Листайте, чтобы познакомиться <span>↓</span></a><span>Коллекция MEIDU</span></div>
+ </section>
+ <section class="intro section-pad" id="intro">
+  <p class="eyebrow reveal">Больше, чем хранение</p>
+  <div class="intro-main"><h2 class="reveal">Не просто гардеробная.<br><em>Ваш личный порядок.</em></h2><div class="intro-bottom reveal"><span class="fine-symbol" aria-hidden="true">衣</span><p>Любимая рубашка. Часы, которые вы носите каждый день. Вещи, у которых есть своя история. Мы помогаем найти место для каждой — в пространстве, которое подходит именно вам.</p><a class="text-link" href="#inside">Красота внутри <span>↗</span></a></div></div>
+ </section>
+ <section class="collection section-pad" id="collection">
+  <div class="section-head reveal"><div><p class="eyebrow">01 / Коллекция решений</p><h2>Форма вашего<br><em>пространства.</em></h2></div><p class="section-aside">От цельной гардеробной<br>до деталей внутри шкафа.<br><span>Выберите то, что близко вам.</span></p></div>
+  <div class="catalog-toolbar"><div class="filters" role="group" aria-label="Категории каталога"><button data-filter="all" aria-pressed="true">Все решения <sup>08</sup></button><button data-filter="systems" aria-pressed="false">Гардеробные</button><button data-filter="filling" aria-pressed="false">Наполнение</button><button data-filter="fronts" aria-pressed="false">Фасады</button></div><label class="search"><span aria-hidden="true">⌕</span><input type="search" id="catalog-search" placeholder="Найти решение" aria-label="Поиск по каталогу"></label></div>
+  <div class="catalog-grid" id="catalog-grid"></div>
+  <div class="empty-search" id="empty-search" hidden><h3>Попробуем иначе?</h3><p>По вашему запросу ничего не найдено.</p><button class="text-link" id="reset-search">Показать все решения <span>↗</span></button></div>
+  <div class="catalog-foot"><span id="catalog-count" role="status">8 решений в коллекции</span><span>Размеры, комплектация и стоимость — по индивидуальному расчёту.</span></div>
+  <noscript><p>Для фильтрации и подбора включите JavaScript. Обсудить гардеробную: <a href="tel:+77019996799">+7 701 999 67 99</a>.</p></noscript>
+ </section>
+ <section class="inside" id="inside">
+  <div class="inside-image reveal"><img id="inside-photo" src="assets/island.webp" alt="Внутренние отделения выдвижного ящика для аксессуаров" loading="lazy" width="547" height="652"><span class="image-note" id="inside-photo-note">Вдохновение / детали хранения</span><span class="inside-image-number" aria-hidden="true">02</span></div>
+  <div class="inside-copy"><p class="eyebrow reveal">02 / Внутреннее наполнение</p><h2 class="reveal">Снаружи — эстетика.<br><em>Внутри — ваш ритм.</em></h2><p class="inside-intro reveal">Хороший гардероб начинается с того, как вы им пользуетесь. Продумайте место для одежды, обуви и самых маленьких вещей.</p>
+   <div class="inside-options" role="group" aria-label="Варианты наполнения"><button class="selected" data-inside="accessories" aria-pressed="true"><span>01</span><span><strong>Ящики и органайзеры</strong><small>Для часов, украшений и личных мелочей</small></span><b>↗</b></button><button data-inside="shelves" aria-pressed="false"><span>02</span><span><strong>Полки и открытые секции</strong><small>Для сложенных вещей и любимых предметов</small></span><b>↗</b></button><button data-inside="open-system" aria-pressed="false"><span>03</span><span><strong>Хранение одежды</strong><small>Для повседневного гардероба</small></span><b>↗</b></button></div>
+   <button class="text-link" id="inside-details">Рассмотреть наполнение <span>↗</span></button>
+  </div>
+ </section>
+ <section class="materials section-pad" id="materials">
+  <div class="section-head reveal"><div><p class="eyebrow">03 / Характер в деталях</p><h2>Тонкие линии.<br><em>Глубокое впечатление.</em></h2></div><p class="section-aside">Стекло меняет свет.<br>Профиль задаёт ритм.<br><span>Вместе они создают настроение.</span></p></div>
+  <div class="material-layout"><div class="material-visual"><img id="material-photo" src="assets/glass-dark.webp" alt="Тёмный профиль и стеклянные фасады" loading="lazy" width="1400" height="1500"><span class="material-badge">МАТЕРИАЛЫ / ПАЛИТРА</span></div><div class="material-copy"><span class="material-index" id="material-index">01 — 03</span><h3 id="material-title">Графит<br><em>и стекло.</em></h3><p id="material-description">Чёткая линия профиля, глубина тёмных оттенков и прозрачность стекла. Выразительно, но спокойно.</p><div class="swatches" role="group" aria-label="Варианты палитры"><button data-material="0" class="selected" aria-pressed="true" aria-label="Палитра Графит"><span style="--swatch:#343532"></span>Графит</button><button data-material="1" aria-pressed="false" aria-label="Палитра Тёплая бронза"><span style="--swatch:#9c8063"></span>Бронза</button><button data-material="2" aria-pressed="false" aria-label="Палитра Мягкий свет"><span style="--swatch:#b6b0a3"></span>Светлый</button></div><p class="material-note">Палитры передают настроение. Точный оттенок и доступные материалы согласуем по образцам.</p><button class="text-link" id="material-save">Добавить решение в подборку <span>+</span></button></div></div>
+ </section>
+ <section class="statement"><p class="eyebrow reveal">IKIGAI / ИСКУССТВО ПОВСЕДНЕВНОГО</p><h2 class="reveal">Красота — в том,<br>как устроен <em>ваш день.</em></h2><span aria-hidden="true" class="statement-line"></span><p class="reveal">Открыть. Найти. Надеть любимое.<br>И начать утро без спешки.</p></section>
+ <section class="process section-pad" id="process"><div class="section-head reveal"><div><p class="eyebrow">04 / От идеи к решению</p><h2>Начнём<br><em>с вашего пространства.</em></h2></div><button class="text-link" data-open-collection>Открыть мою подборку <span>↗</span></button></div><div class="process-grid"><article class="reveal"><span>01</span><h3>Выберите близкое</h3><p>Сохраните понравившиеся системы и наполнение в личную подборку.</p></article><article class="reveal"><span>02</span><h3>Расскажите о задаче</h3><p>Добавьте размеры помещения и пожелания. Отправьте подборку нам в WhatsApp.</p></article><article class="reveal"><span>03</span><h3>Обсудим детали</h3><p>Уточним состав заказа, доступные материалы, стоимость и условия реализации.</p></article></div><div class="payment-row"><span class="payment-icon" aria-hidden="true">↗</span><div><h3>Оплата вашего заказа</h3><p>Информация об оплате и следующем шаге.</p></div><button class="text-link" data-open-payment>Подробнее <span>↗</span></button></div></section>
+ <section class="contact section-pad" id="contact"><div class="contact-heading"><p class="eyebrow reveal">05 / Ваш следующий шаг</p><h2 class="reveal">Давайте найдём место<br><em>для ваших идей.</em></h2></div><div class="contact-layout"><div class="contact-info"><p>Покажите, что вам нравится.<br>Расскажите, что важно.<br>Начнём с простого разговора.</p><a class="phone" href="tel:+77019996799">+7 701 999 67 99</a><a class="location" href="https://2gis.kz/astana/firm/70000001117255424" target="_blank" rel="noopener noreferrer">Астана, Акмешит, 19/8 <span>↗</span></a></div><form id="contact-form"><label>Как к вам обращаться<input name="name" autocomplete="name" placeholder="Ваше имя" maxlength="80"></label><label>Пара слов о вашем проекте<textarea name="comment" rows="2" placeholder="Например: гардеробная 3 × 2 м, стеклянные фасады" maxlength="1500"></textarea></label><button type="submit" class="light-button">Обсудить в WhatsApp <span>↗</span></button><p class="form-note">Откроется текст сообщения. Вы проверяете его и отправляете сами.</p></form></div></section>
+ <footer><a class="footer-logo" href="#home">IKIGAI</a><span>Гардеробные и внутреннее наполнение<br>Астана · 2026</span><button class="footer-link" data-open-payment>Оплата</button><a href="#home">Наверх ↑</a></footer>
+</main>
+<dialog id="product-dialog" class="product-dialog" aria-labelledby="product-title"><button class="dialog-close" aria-label="Закрыть карточку">×</button><div id="product-content"></div></dialog>
+<dialog id="collection-dialog" class="collection-dialog" aria-labelledby="selection-title"><button class="dialog-close" aria-label="Закрыть подборку">×</button><p class="eyebrow">Ваше личное пространство</p><h2 id="selection-title">Моя <em>подборка.</em></h2><p class="drawer-intro">Сохранённые решения для разговора о вашем проекте.</p><div id="selected-products"></div><form id="selection-form"><label>Ваше имя<input name="name" autocomplete="name" placeholder="Как к вам обращаться" maxlength="80"></label><label>Размеры или площадь<input name="dimensions" placeholder="Например: ширина 3 м, высота 2,7 м" maxlength="120"></label><label>Ваши пожелания<textarea name="comment" rows="2" placeholder="Что важно учесть?" maxlength="1500"></textarea></label><button class="dark-button" type="submit">Отправить на расчёт <span>↗</span></button><p class="form-note">Подборка сохранена в этом браузере. Сообщение отправляете вы.</p></form><button class="drawer-payment text-link" data-open-payment>Информация об оплате <span>↗</span></button></dialog>
+<dialog id="payment-dialog" class="payment-dialog" aria-labelledby="payment-title"><button class="dialog-close" aria-label="Закрыть информацию об оплате">×</button><p class="eyebrow">IKIGAI / Ваш заказ</p><h2 id="payment-title">Сначала детали.<br><em>Потом оплата.</em></h2><p>Стоимость гардеробной зависит от её размеров, материалов и наполнения. Сначала нужно согласовать состав заказа и итоговую сумму.</p><div class="payment-status"><span class="status-dot"></span><div><strong>Онлайн-оплата пока недоступна</strong><p>Платёжный сервис ещё не подключён. Этот сайт сейчас не принимает платежи и данные банковских карт.</p></div></div><button class="dark-button" id="payment-to-selection">Перейти к подборке <span>↗</span></button></dialog>
+<div class="toast" role="status" aria-live="polite" id="toast"></div>
+</body></html>
